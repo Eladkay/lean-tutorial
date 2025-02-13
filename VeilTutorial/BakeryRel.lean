@@ -133,7 +133,8 @@ trusted invariant pc_cs P  -> ( ¬pc_p1 P  ∧ ¬pc_p2 P  ∧ ¬pc_p3 P  ∧ ¬p
 trusted invariant pc_p7 P  -> ( ¬pc_p1 P  ∧ ¬pc_p2 P  ∧ ¬pc_p3 P  ∧ ¬pc_p4 P  ∧ ¬pc_p5 P  ∧ ¬pc_p6 P  ∧ ¬pc_cs P              )
 
 ghost relation ll (i j : processor) :=
-   le (number i) (number j) ∨ (number i = number j ∧ le i j)
+  -- number j > number i OR (number i = number j AND i <= j)
+   ¬ (le (number j) (number i)) ∨ (number i = number j ∧ le i j)
 
 /-
 ```
@@ -302,8 +303,11 @@ action p7_fail (self : processor) (shouldRepeat : Prop) = {
 }
 
 safety [mutual_exclusion] ∀ pi pj, (pi ≠ pj) → ¬ (pc_cs pi ∧ pc_cs pj)
-invariant [cs_not_zero] ∀ P, pc_cs P → number P ≠ zero
-invariant [zero_not_awaiting] ∀ P, number P = zero → ¬ (pc_p4 P ∨ pc_p5 P ∨ pc_p6 P)
+
+invariant [ic3po_global1_11] forall P1 , number P1 = zero -> ¬pc_p4 P1
+invariant [ic3po_other3] forall P1 , number P1 = zero -> ¬pc_p5 P1
+invariant [ic3po_other4] forall P1 , number P1 = zero -> ¬pc_p6 P1
+invariant [ic3po_other2] forall P1 , pc_cs P1 -> ¬ number P1 = zero
 
 invariant [ic3po_global1_23] (forall P1 , (pc_p2 P1 -> choosing P1))
 invariant [ic3po_other1] (forall P1 , (pc_p3 P1 -> choosing P1))
@@ -341,11 +345,8 @@ invariant [ic3po_other10] forall P1 P2 , pc_p6 P2 ∧ pc_cs P1 -> unread P2 P1
 
 #gen_spec
 
--- set_option trace.profiler true
--- set_option veil.smt.solver "cvc5"
-
-
-set_option veil.printCounterexamples true
+set_option trace.profiler true
+set_option veil.smt.solver "cvc5"
 
 -- #check_action exec_p1
 -- #check_action p1_fail
@@ -356,11 +357,13 @@ set_option veil.printCounterexamples true
 -- #check_action exec_p4
 -- #check_action p4_fail
 -- #check_action exec_p5_loop
-#check_action exec_p5_exit_loop
-#check_action exec_p6
+-- #check_action exec_p5_exit_loop
+-- #check_action exec_p6
 -- #check_action exec_cs
 -- #check_action exec_p7
 -- #check_action p7_fail
+
+-- #check_invariants
 
 #exit
 
