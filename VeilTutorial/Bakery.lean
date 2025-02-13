@@ -307,6 +307,40 @@ invariant [mutual_exclusion] ∀ pi pj, (pi ≠ pj) → ¬ (pc pi = cs ∧ pc pj
 
 #gen_spec
 
-#check_invariants
+set_option maxHeartbeats 100000000
+
+unsat trace [cannot_immediately_enter_cs] {
+  any action
+  exec_cs
+} by bmc
+
+
+sat trace [can_eventually_enter_cs] {
+  any 5 actions
+  exec_cs
+} by bmc_sat
+
+sat trace {
+  exec_p1
+  exec_p2_end_loop
+} by bmc_sat
+
+set_option veil.smt.solver "cvc5" in
+sat trace {
+  exec_p1
+  exec_p2_loop
+  exec_p2_loop
+  exec_p2_end_loop
+  exec_p3
+  exec_p4
+  exec_p5_loop
+  exec_p6
+} by bmc_sat
+
+
+set_option veil.smt.model.minimize true
+set_option veil.printCounterexamples true
+
+#check_invariants_tr
 
 end Bakery

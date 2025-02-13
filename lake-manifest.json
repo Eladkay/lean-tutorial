@@ -5,7 +5,7 @@
    "type": "git",
    "subDir": null,
    "scope": "",
-   "rev": "76265acba48889ee94d8e5e0b36dda19deb5e90a",
+   "rev": "d5d0f6cedd949943ee4f5f3c31d5abca7f120fe7",
    "name": "veil",
    "manifestFile": "lake-manifest.json",
    "inputRev": "main",
@@ -131,5 +131,5 @@
    "inputRev": "main",
    "inherited": true,
    "configFile": "lakefile.toml"}],
- "name": "«veil-usage-example»",
+ "name": "«veil-tutorial»",
  "lakeDir": ".lake"}
