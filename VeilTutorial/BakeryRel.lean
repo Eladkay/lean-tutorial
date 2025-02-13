@@ -132,7 +132,7 @@ trusted invariant pc_p6 P  -> ( ¬pc_p1 P  ∧ ¬pc_p2 P  ∧ ¬pc_p3 P  ∧ ¬p
 trusted invariant pc_cs P  -> ( ¬pc_p1 P  ∧ ¬pc_p2 P  ∧ ¬pc_p3 P  ∧ ¬pc_p4 P  ∧ ¬pc_p5 P  ∧ ¬pc_p6 P  ∧             ¬pc_p7 P  )
 trusted invariant pc_p7 P  -> ( ¬pc_p1 P  ∧ ¬pc_p2 P  ∧ ¬pc_p3 P  ∧ ¬pc_p4 P  ∧ ¬pc_p5 P  ∧ ¬pc_p6 P  ∧ ¬pc_cs P              )
 
-ghost relation ticketLt (i j : processor) :=
+ghost relation ll (i j : processor) :=
    le (number i) (number j) ∨ (number i = number j ∧ le i j)
 
 /-
@@ -271,7 +271,7 @@ action exec_p5_exit_loop (self : processor) = {
 action exec_p6 (self : processor) (nxt : processor) = {
   require pc_p6 self
   require awaited self nxt
-  require number nxt = zero ∨ ticketLt self nxt
+  require number nxt = zero ∨ ll self nxt
   unread self nxt := False
   pc_p6 self := False; pc_p5 self := True
 }
@@ -301,14 +301,66 @@ action p7_fail (self : processor) (shouldRepeat : Prop) = {
   number self := k
 }
 
-invariant [mutual_exclusion] ∀ pi pj, (pi ≠ pj) → ¬ (pc_cs pi ∧ pc_cs pj)
+safety [mutual_exclusion] ∀ pi pj, (pi ≠ pj) → ¬ (pc_cs pi ∧ pc_cs pj)
+invariant [cs_not_zero] ∀ P, pc_cs P → number P ≠ zero
+invariant [zero_not_awaiting] ∀ P, number P = zero → ¬ (pc_p4 P ∨ pc_p5 P ∨ pc_p6 P)
+
+invariant [ic3po_global1_23] (forall P1 , (pc_p2 P1 -> choosing P1))
+invariant [ic3po_other1] (forall P1 , (pc_p3 P1 -> choosing P1))
+
+invariant [ic3po_other24] forall P1 P2 , pc_p5 P2 ∧ choosing P1 ∧ pc_p5 P1 -> P2 = P1 ∨ unread P2 P1
+invariant [ic3po_other20] forall P1 P2 , pc_p6 P2 ∧ choosing P1 ∧ pc_p5 P1 -> unread P2 P1
+invariant [ic3po_other26] forall P1 P2 , pc_p6 P2 -> choosing P1 -> awaited P2 P1 -> ¬pc_p5 P1
+invariant [ic3po_other28] forall P1 P2 , pc_p6 P2 ∧ choosing P1 ∧ awaited P2 P1 ∧ pc_p6 P1 -> P2 = P1
+invariant [ic3po_other30] forall P1 P2 P3 , choosing P3 ∧ awaited P2 P1 ∧ pc_cs P2 ∧ pc_p5 P3 -> P3 = P1 ∨ P1 = P2
+invariant [ic3po_other21] forall P1 P2 , pc_p6 P1 ∧ pc_p5 P2 ∧ choosing P1 -> unread P2 P1
+invariant [ic3po_other25] forall P1 P2 , pc_p6 P2 ∧ pc_p6 P1 ∧ choosing P1 -> P2 = P1 ∨ unread P2 P1
+invariant [ic3po_other31] forall P1 P2 P3 , choosing P3 ∧ awaited P2 P1 ∧ pc_cs P2 ∧ pc_p6 P3 -> P3 = P1 ∨ P1 = P2
+
+invariant [ic3po_other27] forall P1 P2 , pc_p6 P2 ∧ pc_p2 P1 ∧ awaited P2 P1 -> unread P1 P2 ∨ le (number P2) (max P1)
+invariant [ic3po_other29] forall P1 P2 , pc_p6 P2 ∧ pc_p3 P1 ∧ awaited P2 P1 ∧ choosing P1 -> le (number P2) (max P1)
+
+invariant [ic3po_other22] forall P1 P2 , pc_p5 P2 ∧ pc_p2 P1 -> unread P2 P1 ∨ le (number P2) (max P1) ∨ unread P1 P2
+invariant [ic3po_other18] forall P1 P2 , pc_p5 P1 ∧ pc_p3 P2 -> unread P1 P2 ∨ le (number P1) (max P2)
+invariant [ic3po_other11] forall P1 P2 , pc_p5 P1 ∧ pc_p4 P2 -> ll P1 P2 ∨ unread P1 P2
+invariant [ic3po_other15] forall P1 P2 , pc_p5 P2 ∧ pc_p5 P1 -> ll P1 P2 ∨ unread P1 P2
+invariant [ic3po_other14] forall P1 P2 , pc_p6 P2 ∧ pc_p5 P1 -> ll P1 P2 ∨ unread P1 P2
+invariant [ic3po_other23] forall P1 P2 , pc_p6 P2 ∧ pc_p2 P1 -> unread P1 P2 ∨ le (number P2) (max P1) ∨ unread P2 P1
+invariant [ic3po_other19] forall P1 P2 , pc_p3 P2 ∧ pc_p6 P1 -> unread P1 P2 ∨ le (number P1) (max P2)
+invariant [ic3po_other12] forall P1 P2 , pc_p6 P1 ∧ pc_p4 P2 -> ll P1 P2 ∨ unread P1 P2
+invariant [ic3po_other13] forall P1 P2 , pc_p6 P1 ∧ pc_p5 P2 -> unread P1 P2 ∨ ll P1 P2
+invariant [ic3po_other16] forall P1 P2 , pc_p6 P1 ∧ pc_p6 P2 -> unread P1 P2 ∨ ll P1 P2
+
+invariant [ic3po_other17] forall P1 P2 , pc_cs P1 ∧ pc_p2 P2 -> unread P2 P1 ∨ le (number P1) (max P2)
+invariant [ic3po_other8] forall P1 P2 , pc_p3 P2 ∧ pc_cs P1 -> le (number P1) (max P2)
+invariant [ic3po_other5] forall P1 P2 , pc_cs P2 ∧ pc_p4 P1 -> ll P2 P1
+invariant [ic3po_other6] forall P1 P2 , pc_cs P2 ∧ pc_p5 P1 -> ll P2 P1
+invariant [ic3po_other9] forall P1 P2 , pc_p5 P2 ∧ pc_cs P1 -> unread P2 P1
+invariant [ic3po_other7] forall P1 P2 , pc_cs P2 ∧ pc_p6 P1 -> ll P2 P1
+invariant [ic3po_other10] forall P1 P2 , pc_p6 P2 ∧ pc_cs P1 -> unread P2 P1
 
 #gen_spec
 
-set_option veil.smt.model.minimize true
+-- set_option trace.profiler true
+-- set_option veil.smt.solver "cvc5"
+
+
 set_option veil.printCounterexamples true
 
-#check_invariants
+-- #check_action exec_p1
+-- #check_action p1_fail
+-- #check_action exec_p2_loop
+-- #check_action exec_p2_end_loop
+-- #check_action exec_p3
+-- #check_action p3_fail
+-- #check_action exec_p4
+-- #check_action p4_fail
+-- #check_action exec_p5_loop
+#check_action exec_p5_exit_loop
+#check_action exec_p6
+-- #check_action exec_cs
+-- #check_action exec_p7
+-- #check_action p7_fail
 
 #exit
 
