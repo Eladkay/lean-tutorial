@@ -165,7 +165,6 @@ p1: while true:
 
 action exec_p1 (self : processor) = {
   require pc_p1 self
-  require ¬ pc_p2 self ∧ ¬ pc_p3 self ∧ ¬ pc_p4 self ∧ ¬ pc_p5 self ∧ ¬ pc_p6 self ∧ ¬ pc_cs self ∧ ¬ pc_p7 self
   choosing self := True
   unread self P := if P = self then False else True
   max self := zero
@@ -176,7 +175,6 @@ action exec_p1 (self : processor) = {
 
 action p1_fail (self : processor) = {
   require pc_p1 self
-  require ¬ pc_p2 self ∧ ¬ pc_p3 self ∧ ¬ pc_p4 self ∧ ¬ pc_p5 self ∧ ¬ pc_p6 self ∧ ¬ pc_cs self ∧ ¬ pc_p7 self
   -- GEORGE: why do they model failure as flipping `choosing` rather than setting it to `False`?
   choosing self := ¬ choosing self
 }
@@ -192,7 +190,6 @@ p2:   # computes max(number[1], ..., number[N]);
 
 action exec_p2_loop (self : processor) (nxt : processor) = {
   require pc_p2 self
-  require ¬ pc_p1 self ∧ ¬ pc_p3 self ∧ ¬ pc_p4 self ∧ ¬ pc_p5 self ∧ ¬ pc_p6 self ∧ ¬ pc_cs self ∧ ¬ pc_p7 self
   require unread self nxt
   if ¬ (le (number nxt) (max self)) then
     max self := number nxt
@@ -201,7 +198,6 @@ action exec_p2_loop (self : processor) (nxt : processor) = {
 
 action exec_p2_end_loop (self : processor) = {
   require pc_p2 self
-  require ¬ pc_p1 self ∧ ¬ pc_p3 self ∧ ¬ pc_p4 self ∧ ¬ pc_p5 self ∧ ¬ pc_p6 self ∧ ¬ pc_cs self ∧ ¬ pc_p7 self
   require ∀ nxt, ¬ unread self nxt
   pc_p2 self := False; pc_p3 self := True
 }
@@ -214,7 +210,6 @@ p3:   number[self] := max + 1;
 
 action exec_p3 (self : processor) = {
   require pc_p3 self
-  require ¬ pc_p1 self ∧ ¬ pc_p2 self ∧ ¬ pc_p4 self ∧ ¬ pc_p5 self ∧ ¬ pc_p6 self ∧ ¬ pc_cs self ∧ ¬ pc_p7 self
   let next_number ← fresh ticket
   -- Some specifications only require that `next_number` is `>` max, but
   -- here we require that it is the successor (i.e. `max + 1`).
@@ -225,7 +220,6 @@ action exec_p3 (self : processor) = {
 
 action p3_fail (self : processor) (shouldRepeat : Prop) = {
   require pc_p3 self
-  require ¬ pc_p1 self ∧ ¬ pc_p2 self ∧ ¬ pc_p4 self ∧ ¬ pc_p5 self ∧ ¬ pc_p6 self ∧ ¬ pc_cs self ∧ ¬ pc_p7 self
   require shouldRepeat
   let k ← fresh ticket
   number self := k
@@ -238,7 +232,6 @@ p4:   unread := P \ { self }; choosing[self] := False;
 
 action exec_p4 (self : processor) = {
   require pc_p4 self
-  require ¬ pc_p1 self ∧ ¬ pc_p2 self ∧ ¬ pc_p3 self ∧ ¬ pc_p5 self ∧ ¬ pc_p6 self ∧ ¬ pc_cs self ∧ ¬ pc_p7 self
   unread self P := if P = self then False else True
   choosing self := False
   pc_p4 self := False; pc_p5 self := True
@@ -246,7 +239,6 @@ action exec_p4 (self : processor) = {
 
 action p4_fail (self : processor) = {
   require pc_p4 self
-  require ¬ pc_p1 self ∧ ¬ pc_p2 self ∧ ¬ pc_p3 self ∧ ¬ pc_p5 self ∧ ¬ pc_p6 self ∧ ¬ pc_cs self ∧ ¬ pc_p7 self
   unread self P := if P = self then False else True
   choosing self := ¬ choosing self
 }
@@ -263,7 +255,6 @@ cs:   enter critical section
 
 action exec_p5_loop (self : processor) (nxt : processor) = {
   require pc_p5 self
-  require ¬ pc_p1 self ∧ ¬ pc_p2 self ∧ ¬ pc_p3 self ∧ ¬ pc_p4 self ∧ ¬ pc_p6 self ∧ ¬ pc_cs self ∧ ¬ pc_p7 self
   require unread self nxt
   require ¬ choosing nxt
   awaited self P := if P = nxt then True else False
@@ -273,14 +264,12 @@ action exec_p5_loop (self : processor) (nxt : processor) = {
 
 action exec_p5_exit_loop (self : processor) = {
   require pc_p5 self
-  require ¬ pc_p1 self ∧ ¬ pc_p2 self ∧ ¬ pc_p3 self ∧ ¬ pc_p4 self ∧ ¬ pc_p6 self ∧ ¬ pc_cs self ∧ ¬ pc_p7 self
   require ∀ nxt, ¬ unread self nxt
   pc_p5 self := False; pc_cs self := True
 }
 
 action exec_p6 (self : processor) (nxt : processor) = {
   require pc_p6 self
-  require ¬ pc_p1 self ∧ ¬ pc_p2 self ∧ ¬ pc_p3 self ∧ ¬ pc_p4 self ∧ ¬ pc_p5 self ∧ ¬ pc_cs self ∧ ¬ pc_p7 self
   require awaited self nxt
   require number nxt = zero ∨ ticketLt self nxt
   unread self nxt := False
@@ -289,7 +278,6 @@ action exec_p6 (self : processor) (nxt : processor) = {
 
 action exec_cs (self : processor) = {
   require pc_cs self = True
-  require ¬ pc_p1 self ∧ ¬ pc_p2 self ∧ ¬ pc_p3 self ∧ ¬ pc_p4 self ∧ ¬ pc_p5 self ∧ ¬ pc_p6 self ∧ ¬ pc_p7 self
   pc_cs self := False; pc_p7 self := True
 }
 
@@ -302,14 +290,12 @@ ncs:  non-critical section
 
 action exec_p7 (self : processor) = {
   require pc_p7 self
-  require ¬ pc_p1 self ∧ ¬ pc_p2 self ∧ ¬ pc_p3 self ∧ ¬ pc_p4 self ∧ ¬ pc_p5 self ∧ ¬ pc_p6 self ∧ ¬ pc_cs self
   number self := zero
   pc_p7 self := False; pc_p1 self := True
 }
 
 action p7_fail (self : processor) (shouldRepeat : Prop) = {
   require pc_p7 self
-  require ¬ pc_p1 self ∧ ¬ pc_p2 self ∧ ¬ pc_p3 self ∧ ¬ pc_p4 self ∧ ¬ pc_p5 self ∧ ¬ pc_p6 self ∧ ¬ pc_cs self
   require shouldRepeat
   let k ← fresh ticket
   number self := k
@@ -318,6 +304,13 @@ action p7_fail (self : processor) (shouldRepeat : Prop) = {
 invariant [mutual_exclusion] ∀ pi pj, (pi ≠ pj) → ¬ (pc_cs pi ∧ pc_cs pj)
 
 #gen_spec
+
+set_option veil.smt.model.minimize true
+set_option veil.printCounterexamples true
+
+#check_invariants_tr
+
+#exit
 
 set_option maxHeartbeats 100000000
 
@@ -349,10 +342,5 @@ sat trace {
   exec_p6
 } by bmc_sat
 
-
-set_option veil.smt.model.minimize true
-set_option veil.printCounterexamples true
-
-#check_invariants_tr
 
 end Bakery
