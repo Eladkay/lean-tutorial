@@ -141,8 +141,9 @@ function pc : processor → pcv
 
 #gen_state
 
-ghost relation ticketLt (i j : processor) :=
-   le (number i) (number j) ∨ (number i = number j ∧ le i j)
+ghost relation ll (i j : processor) :=
+  -- number j > number i OR (number i = number j AND i <= j)
+   ¬ (le (number j) (number i)) ∨ (number i = number j ∧ le i j)
 
 /-
 ```
@@ -273,7 +274,7 @@ action exec_p5_exit_loop (self : processor) = {
 action exec_p6 (self : processor) (nxt : processor) = {
   require pc self = p6
   require awaited self nxt
-  require number nxt = zero ∨ ticketLt self nxt
+  require number nxt = zero ∨ ll self nxt
   unread self nxt := False
   pc self := p5
 }
@@ -304,8 +305,67 @@ action p7_fail (self : processor) (shouldRepeat : Prop) = {
 }
 
 invariant [mutual_exclusion] ∀ pi pj, (pi ≠ pj) → ¬ (pc pi = cs ∧ pc pj = cs)
+invariant [ic3po_global1_11] forall P1 , number P1 = zero -> ¬pc P1 = p4
+invariant [ic3po_other3] forall P1 , number P1 = zero -> ¬pc P1 = p5
+invariant [ic3po_other4] forall P1 , number P1 = zero -> ¬pc P1 = p6
+invariant [ic3po_other2] forall P1 , pc P1 = cs -> ¬ number P1 = zero
 
+invariant [ic3po_global1_23] (forall P1 , (pc P1 = p2 -> choosing P1))
+invariant [ic3po_other1] (forall P1 , (pc P1 = p3 -> choosing P1))
+
+invariant [ic3po_other24] forall P1 P2 , pc P2 = p5 ∧ choosing P1 ∧ pc P1 = p5 -> P2 = P1 ∨ unread P2 P1
+invariant [ic3po_other20] forall P1 P2 , pc P2 = p6 ∧ choosing P1 ∧ pc P1 = p5 -> unread P2 P1
+invariant [ic3po_other26] forall P1 P2 , pc P2 = p6 -> choosing P1 -> awaited P2 P1 -> ¬pc P1 = p5
+invariant [ic3po_other28] forall P1 P2 , pc P2 = p6 ∧ choosing P1 ∧ awaited P2 P1 ∧ pc P1 = p6 -> P2 = P1
+invariant [ic3po_other30] forall P1 P2 P3 , choosing P3 ∧ awaited P2 P1 ∧ pc P2 = cs ∧ pc P3 = p5 -> P3 = P1 ∨ P1 = P2
+invariant [ic3po_other21] forall P1 P2 , pc P1 = p6 ∧ pc P2 = p5 ∧ choosing P1 -> unread P2 P1
+invariant [ic3po_other25] forall P1 P2 , pc P2 = p6 ∧ pc P1 = p6 ∧ choosing P1 -> P2 = P1 ∨ unread P2 P1
+invariant [ic3po_other31] forall P1 P2 P3 , choosing P3 ∧ awaited P2 P1 ∧ pc P2 = cs ∧ pc P3 = p6 -> P3 = P1 ∨ P1 = P2
+
+invariant [ic3po_other27] forall P1 P2 , pc P2 = p6 ∧ pc P1 = p2 ∧ awaited P2 P1 -> unread P1 P2 ∨ le (number P2) (max P1)
+invariant [ic3po_other29] forall P1 P2 , pc P2 = p6 ∧ pc P1 = p3 ∧ awaited P2 P1 ∧ choosing P1 -> le (number P2) (max P1)
+
+invariant [ic3po_other22] forall P1 P2 , pc P2 = p5 ∧ pc P1 = p2 -> unread P2 P1 ∨ le (number P2) (max P1) ∨ unread P1 P2
+invariant [ic3po_other18] forall P1 P2 , pc P1 = p5 ∧ pc P2 = p3 -> unread P1 P2 ∨ le (number P1) (max P2)
+invariant [ic3po_other11] forall P1 P2 , pc P1 = p5 ∧ pc P2 = p4 -> ll P1 P2 ∨ unread P1 P2
+invariant [ic3po_other15] forall P1 P2 , pc P2 = p5 ∧ pc P1 = p5 -> ll P1 P2 ∨ unread P1 P2
+invariant [ic3po_other14] forall P1 P2 , pc P2 = p6 ∧ pc P1 = p5 -> ll P1 P2 ∨ unread P1 P2
+invariant [ic3po_other23] forall P1 P2 , pc P2 = p6 ∧ pc P1 = p2 -> unread P1 P2 ∨ le (number P2) (max P1) ∨ unread P2 P1
+invariant [ic3po_other19] forall P1 P2 , pc P2 = p3 ∧ pc P1 = p6 -> unread P1 P2 ∨ le (number P1) (max P2)
+invariant [ic3po_other12] forall P1 P2 , pc P1 = p6 ∧ pc P2 = p4 -> ll P1 P2 ∨ unread P1 P2
+invariant [ic3po_other13] forall P1 P2 , pc P1 = p6 ∧ pc P2 = p5 -> unread P1 P2 ∨ ll P1 P2
+invariant [ic3po_other16] forall P1 P2 , pc P1 = p6 ∧ pc P2 = p6 -> unread P1 P2 ∨ ll P1 P2
+
+invariant [ic3po_other17] forall P1 P2 , pc P1 = cs ∧ pc P2 = p2 -> unread P2 P1 ∨ le (number P1) (max P2)
+invariant [ic3po_other8] forall P1 P2 , pc P2 = p3 ∧ pc P1 = cs -> le (number P1) (max P2)
+invariant [ic3po_other5] forall P1 P2 , pc P2 = cs ∧ pc P1 = p4 -> ll P2 P1
+invariant [ic3po_other6] forall P1 P2 , pc P2 = cs ∧ pc P1 = p5 -> ll P2 P1
+invariant [ic3po_other9] forall P1 P2 , pc P2 = p5 ∧ pc P1 = cs -> unread P2 P1
+invariant [ic3po_other7] forall P1 P2 , pc P2 = cs ∧ pc P1 = p6 -> ll P2 P1
+invariant [ic3po_other10] forall P1 P2 , pc P2 = p6 ∧ pc P1 = cs -> unread P2 P1
 #gen_spec
+
+set_option trace.profiler true
+set_option veil.smt.solver "cvc5"
+
+#check_action exec_p1
+#check_action p1_fail
+#check_action exec_p2_loop
+#check_action exec_p2_end_loop
+#check_action exec_p3
+#check_action p3_fail
+#check_action exec_p4
+#check_action p4_fail
+#check_action exec_p5_loop
+#check_action exec_p5_exit_loop
+#check_action exec_p6
+#check_action exec_cs
+#check_action exec_p7
+#check_action p7_fail
+
+-- #check_invariants
+
+#exit
 
 set_option maxHeartbeats 100000000
 
@@ -337,10 +397,5 @@ sat trace {
   exec_p6
 } by bmc_sat
 
-
-set_option veil.smt.model.minimize true
-set_option veil.printCounterexamples true
-
-#check_invariants_tr
 
 end Bakery
