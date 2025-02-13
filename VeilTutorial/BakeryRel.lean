@@ -122,15 +122,15 @@ relation pc_p7 (P:processor)
 
 #gen_state
 
-invariant (pc_p1 P) ∨ (pc_p2 P) ∨ (pc_p3 P) ∨ (pc_p4 P) ∨ (pc_p5 P) ∨ (pc_p6 P) ∨ (pc_cs P) ∨ (pc_p7 P)
-invariant pc_p1 P  -> (             ¬pc_p2 P  ∧ ¬pc_p3 P  ∧ ¬pc_p4 P  ∧ ¬pc_p5 P  ∧ ¬pc_p6 P  ∧ ¬pc_cs P  ∧ ¬pc_p7 P  )
-invariant pc_p2 P  -> ( ¬pc_p1 P  ∧             ¬pc_p3 P  ∧ ¬pc_p4 P  ∧ ¬pc_p5 P  ∧ ¬pc_p6 P  ∧ ¬pc_cs P  ∧ ¬pc_p7 P  )
-invariant pc_p3 P  -> ( ¬pc_p1 P  ∧ ¬pc_p2 P  ∧             ¬pc_p4 P  ∧ ¬pc_p5 P  ∧ ¬pc_p6 P  ∧ ¬pc_cs P  ∧ ¬pc_p7 P  )
-invariant pc_p4 P  -> ( ¬pc_p1 P  ∧ ¬pc_p2 P  ∧ ¬pc_p3 P  ∧             ¬pc_p5 P  ∧ ¬pc_p6 P  ∧ ¬pc_cs P  ∧ ¬pc_p7 P  )
-invariant pc_p5 P  -> ( ¬pc_p1 P  ∧ ¬pc_p2 P  ∧ ¬pc_p3 P  ∧ ¬pc_p4 P  ∧             ¬pc_p6 P  ∧ ¬pc_cs P  ∧ ¬pc_p7 P  )
-invariant pc_p6 P  -> ( ¬pc_p1 P  ∧ ¬pc_p2 P  ∧ ¬pc_p3 P  ∧ ¬pc_p4 P  ∧ ¬pc_p5 P  ∧             ¬pc_cs P  ∧ ¬pc_p7 P  )
-invariant pc_cs P  -> ( ¬pc_p1 P  ∧ ¬pc_p2 P  ∧ ¬pc_p3 P  ∧ ¬pc_p4 P  ∧ ¬pc_p5 P  ∧ ¬pc_p6 P  ∧             ¬pc_p7 P  )
-invariant pc_p7 P  -> ( ¬pc_p1 P  ∧ ¬pc_p2 P  ∧ ¬pc_p3 P  ∧ ¬pc_p4 P  ∧ ¬pc_p5 P  ∧ ¬pc_p6 P  ∧ ¬pc_cs P              )
+trusted invariant (pc_p1 P) ∨ (pc_p2 P) ∨ (pc_p3 P) ∨ (pc_p4 P) ∨ (pc_p5 P) ∨ (pc_p6 P) ∨ (pc_cs P) ∨ (pc_p7 P)
+trusted invariant pc_p1 P  -> (             ¬pc_p2 P  ∧ ¬pc_p3 P  ∧ ¬pc_p4 P  ∧ ¬pc_p5 P  ∧ ¬pc_p6 P  ∧ ¬pc_cs P  ∧ ¬pc_p7 P  )
+trusted invariant pc_p2 P  -> ( ¬pc_p1 P  ∧             ¬pc_p3 P  ∧ ¬pc_p4 P  ∧ ¬pc_p5 P  ∧ ¬pc_p6 P  ∧ ¬pc_cs P  ∧ ¬pc_p7 P  )
+trusted invariant pc_p3 P  -> ( ¬pc_p1 P  ∧ ¬pc_p2 P  ∧             ¬pc_p4 P  ∧ ¬pc_p5 P  ∧ ¬pc_p6 P  ∧ ¬pc_cs P  ∧ ¬pc_p7 P  )
+trusted invariant pc_p4 P  -> ( ¬pc_p1 P  ∧ ¬pc_p2 P  ∧ ¬pc_p3 P  ∧             ¬pc_p5 P  ∧ ¬pc_p6 P  ∧ ¬pc_cs P  ∧ ¬pc_p7 P  )
+trusted invariant pc_p5 P  -> ( ¬pc_p1 P  ∧ ¬pc_p2 P  ∧ ¬pc_p3 P  ∧ ¬pc_p4 P  ∧             ¬pc_p6 P  ∧ ¬pc_cs P  ∧ ¬pc_p7 P  )
+trusted invariant pc_p6 P  -> ( ¬pc_p1 P  ∧ ¬pc_p2 P  ∧ ¬pc_p3 P  ∧ ¬pc_p4 P  ∧ ¬pc_p5 P  ∧             ¬pc_cs P  ∧ ¬pc_p7 P  )
+trusted invariant pc_cs P  -> ( ¬pc_p1 P  ∧ ¬pc_p2 P  ∧ ¬pc_p3 P  ∧ ¬pc_p4 P  ∧ ¬pc_p5 P  ∧ ¬pc_p6 P  ∧             ¬pc_p7 P  )
+trusted invariant pc_p7 P  -> ( ¬pc_p1 P  ∧ ¬pc_p2 P  ∧ ¬pc_p3 P  ∧ ¬pc_p4 P  ∧ ¬pc_p5 P  ∧ ¬pc_p6 P  ∧ ¬pc_cs P              )
 
 ghost relation ticketLt (i j : processor) :=
    le (number i) (number j) ∨ (number i = number j ∧ le i j)
@@ -308,7 +308,7 @@ invariant [mutual_exclusion] ∀ pi pj, (pi ≠ pj) → ¬ (pc_cs pi ∧ pc_cs p
 set_option veil.smt.model.minimize true
 set_option veil.printCounterexamples true
 
-#check_invariants_tr
+#check_invariants
 
 #exit
 
