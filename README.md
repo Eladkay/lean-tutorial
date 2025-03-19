@@ -1,4 +1,6 @@
-# Veil tutorial
+# Lean & Veil tutorial
+
+Based on [dranov/veil-tutorial](https://github.com/dranov/veil-tutorial) and cloned with permission.
 
 ## Build
 
