@@ -1,5 +1,6 @@
 import Lean
 import Aesop
+import Veil
 
 -----  Lean as an Interactive Theorem Prover -----
 

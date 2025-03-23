@@ -61,7 +61,7 @@ that accepts a function f and a
 natural number n and returns a
 new function that applies f on its
 argument n times.
-Do not use parentheses in your implementation.
+**Do not use parentheses in your implementation**.
 -/
 def rep {α : Type} (f : α → α) (n : Nat): α → α := sorry
 
